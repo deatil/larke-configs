@@ -27,6 +27,27 @@ composer require larke/configs
 2、然后在 `本地扩展->扩展管理->安装/更新` 安装本扩展
 
 
+### 示例
+
+~~~php
+// 保存或者修改数据
+$cfg = larke_configs("cms");
+$cfg->version = 0.21;
+$cfg->data1 = "data11";
+$cfg->value = "value111";
+$cfg->value2 = "value211";
+// 删除数据并保存
+// unset($cfg->data); 
+$cfg->save();
+
+// 删除全部配置
+larke_configs("cms")->delete();
+
+// 获取数据
+$value2 = larke_configs("cms")->value2;
+~~~ 
+
+
 ### 开源协议
 
 *  本扩展 遵循 `Apache2` 开源协议发布，在保留本扩展版权的情况下提供个人及商业免费使用。 
