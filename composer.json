@@ -1,0 +1,68 @@
+{
+    "name": "larke/configs",
+    "description": "The configs is a larke-admin'extension.",
+    "keywords": [
+        "larke",
+        "log",
+        "viewer",
+        "log-viewer",
+        "admin",
+        "larke-admin"
+    ],
+    "homepage": "https://github.com/deatil/larke-configs",
+    "type": "library",
+    "license": "Apache-2.0",
+    "authors": [
+        {
+            "name": "deatil",
+            "email": "deatil@github.com",
+            "homepage": "https://github.com/deatil",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": "^8.0",
+        "lake/larke-admin":"^2.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Larke\\Admin\\Configs\\": "src"
+        },
+        "files": [
+            "src/helper.php"
+        ]
+    },
+    "extra" : {
+        "larke": {
+            "title": "系统通用配置",
+            "description": "larke-admin 系统通用配置",
+            "keywords": [
+                "lake",
+                "larke",
+                "demo",
+                "admin",
+                "larke-admin",
+                "viewer",
+                "logviewer"
+            ],
+            "homepage": "https://github.com/deatil/larke-configs",
+            "authors": [
+                {
+                    "name": "deatil",
+                    "email": "deatil@github.com",
+                    "homepage": "https://github.com/deatil",
+                    "role": "Developer"
+                }
+            ],
+            "version": "2.0.0",
+            "adaptation": "^2.0",
+            "require": {},
+            "order": 1000
+        },
+        "laravel" : {
+            "providers" : [
+                "Larke\\Admin\\Configs\\ServiceProvider"
+            ]
+        }
+    }
+}
