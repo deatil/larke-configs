@@ -5,6 +5,7 @@ declare (strict_types = 1);
 namespace Larke\Admin\Configs\Config;
 
 use Iterator;
+use ArrayAccess;
 
 use Illuminate\Support\Facades\DB;
 use Larke\Admin\Configs\Model\Config as ConfigModel;
@@ -12,7 +13,7 @@ use Larke\Admin\Configs\Model\Config as ConfigModel;
 /**
  * 配置类
  */
-class Config implements Iterator
+class Config implements Iterator, ArrayAccess
 {
     // 存$key的数组，非$value
     private $array = []; 
@@ -44,44 +45,21 @@ class Config implements Iterator
         $this->data['Name'] = $itemName;
         $this->position = 0;
     }
-
+    
     /**
-     * @param $name
-     * @param $value
-     */
-    public function __set($name, $value)
-    {
-        $this->addKey($name, $value);
-    }
-
-    /**
-     * @param string $name key名
+     * 导入数据
      *
-     * @return null
+     * @return void
      */
-    public function __get($name)
+    public function loadInfo($key, $value)
     {
-        return $this->getKey($name);
+        $value = $this->unserializeData($value);
+        $this->kvdata[$key] = $value;
+        $this->origkvdata[$key] = $value;
     }
 
     /**
-     * @param $name
-     */
-    public function __isset($name)
-    {
-        return $this->hasKey($name);
-    }
-
-    /**
-     * @param $name
-     */
-    public function __unset($name)
-    {
-        $this->delKey($name);
-    }
-
-    /**
-     * 获取Config的Item(项目名).
+     * 获取 Item 名
      *
      * @return string
      */
@@ -127,7 +105,7 @@ class Config implements Iterator
     }
     
     /**
-     * 添加or修改Key.
+     * 添加 or 修改 Key
      *
      * @param $name
      *
@@ -164,7 +142,7 @@ class Config implements Iterator
     }
 
     /**
-     * 检查KVData属性（数组）中的单元数目.
+     * 获取数量
      *
      * @return int
      */
@@ -176,27 +154,6 @@ class Config implements Iterator
     public function countItemOrig()
     {
         return count($this->origkvdata);
-    }
-
-    public function serializeData($value)
-    {
-        return serialize($value);
-    }
-
-    public function unserializeData($value)
-    {
-        $s = @unserialize($value);
-
-        return $s;
-    }
-    
-    public function loadInfo($key, $value)
-    {
-        $value = $this->unserializeData($value);
-        $this->kvdata[$key] = $value;
-        $this->origkvdata[$key] = $value;
-
-        return true;
     }
 
     /**
@@ -364,39 +321,6 @@ class Config implements Iterator
         return true;
     }
 
-    private $position = 0;
-
-    #[\ReturnTypeWillChange]
-    public function rewind()
-    {
-        $this->array = array_keys($this->kvdata);
-        $this->position = 0;
-    }
-
-    #[\ReturnTypeWillChange]
-    public function current()
-    {
-        return $this->kvdata[$this->array[$this->position]];
-    }
-
-    #[\ReturnTypeWillChange]
-    public function key()
-    {
-        return $this->array[$this->position];
-    }
-
-    #[\ReturnTypeWillChange]
-    public function next()
-    {
-        ++$this->position;
-    }
-
-    #[\ReturnTypeWillChange]
-    public function valid()
-    {
-        return array_key_exists($this->position, $this->array);
-    }
-
     /**
      * 序列化
      *
@@ -435,6 +359,122 @@ class Config implements Iterator
         return true;
     }
 
+    public function serializeData($value)
+    {
+        return serialize($value);
+    }
+
+    public function unserializeData($value)
+    {
+        $s = @unserialize($value);
+
+        return $s;
+    }
+
+    private $position = 0;
+
+    #[\ReturnTypeWillChange]
+    public function rewind()
+    {
+        $this->array = array_keys($this->kvdata);
+        $this->position = 0;
+    }
+
+    #[\ReturnTypeWillChange]
+    public function current()
+    {
+        return $this->kvdata[$this->array[$this->position]];
+    }
+
+    #[\ReturnTypeWillChange]
+    public function key()
+    {
+        return $this->array[$this->position];
+    }
+
+    #[\ReturnTypeWillChange]
+    public function next()
+    {
+        ++$this->position;
+    }
+
+    #[\ReturnTypeWillChange]
+    public function valid()
+    {
+        return array_key_exists($this->position, $this->array);
+    }
+
+    /**
+     * @param mixed $offset
+     * @return bool
+     */
+    public function offsetExists($offset): bool
+    {
+        return $this->hasKey($offset);
+    }
+
+    /**
+     * @param mixed $offset
+     * @return mixed
+     */
+    #[\ReturnTypeWillChange]
+    public function offsetGet($offset)
+    {
+        return $this->getKey($offset);
+    }
+
+    /**
+     * @param mixed $offset
+     * @param mixed $value
+     */
+    public function offsetSet($offset, $value): void
+    {
+        $this->addKey($offset, $value);
+    }
+
+    /**
+     * @param mixed $offset
+     */
+    public function offsetUnset($offset): void
+    {
+        $this->delKey($offset);
+    }
+
+    /**
+     * @param $name
+     * @param $value
+     */
+    public function __set($name, $value)
+    {
+        $this->addKey($name, $value);
+    }
+
+    /**
+     * @param string $name key名
+     *
+     * @return null
+     */
+    public function __get($name)
+    {
+        return $this->getKey($name);
+    }
+
+    /**
+     * @param $name
+     */
+    public function __isset($name)
+    {
+        return $this->hasKey($name);
+    }
+
+    /**
+     * @param $name
+     */
+    public function __unset($name)
+    {
+        $this->delKey($name);
+    }
+
     /**
      * 返回JSON数据
      *
@@ -443,6 +483,14 @@ class Config implements Iterator
     public function __toString()
     {
         return (string) json_encode($this->kvdata);
+    }
+
+    /**
+     * @return array
+     */
+    public function toArray(): array
+    {
+        return $this->kvdata;
     }
 
     /**
